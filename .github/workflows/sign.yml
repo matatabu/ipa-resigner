@@ -11,11 +11,11 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install gdown
-        run: pip3 install gdown
+        run: pip3 install gdown --break-system-packages
 
       - name: Download IPA
         run: |
-          gdown --id 1IllWdFD2eHowTVDelG3hpbhme9Tlzhy2 -O MLBB_unsigned.ipa
+          gdown --id 1I1IWdFD2eHoWTvDe1G3hpbhme9Tlzhy2 -O MLBB_unsigned.ipa
 
       - name: Unzip and re-sign app
         run: |
@@ -24,7 +24,7 @@ jobs:
           unzip -q MLBB_unsigned.ipa || { echo "Unzip failed"; exit 1; }
 
           echo "Verifying Payload contents..."
-          ls -al Payload || { echo "Payload directory missing"; exit 1; }
+          ls -l Payload || { echo "Payload directory missing"; exit 1; }
 
           echo "Signing app..."
           codesign -s - --force --deep Payload/*.app || { echo "Code signing failed"; exit 1; }
