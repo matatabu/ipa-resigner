@@ -24,8 +24,7 @@ jobs:
           zip -qry MLBB_signed.ipa Payload
 
       - name: Upload Signed IPA
-        uses: actions/upload-artifact@v3.1.3
+        uses: actions/upload-artifact@v3
         with:
           name: MLBB_signed
           path: MLBB_signed.ipa
-          if-no-files-found: error
