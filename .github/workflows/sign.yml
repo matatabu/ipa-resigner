@@ -3,25 +3,19 @@ name: Sign iOS IPA
 on:
   workflow_dispatch:
 
-permissions:
-  contents: read
-  actions: read
-  id-token: write
-
 jobs:
   sign-ipa:
     runs-on: macos-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3.5.3
+        uses: actions/checkout@v3
 
       - name: Install gdown to download from Google Drive
         run: pip3 install gdown
 
-      - name: Download IPA
+      - name: Download MLBB_unsigned.ipa from Google Drive
         run: |
           gdown --id 1IllWdFD2eHowTVDelG3hpbhme9Tlzhy2 -O MLBB_unsigned.ipa
-          ls -lh
 
       - name: Unzip IPA and re-sign app
         run: |
@@ -34,3 +28,4 @@ jobs:
         with:
           name: MLBB_signed
           path: MLBB_signed.ipa
+          if-no-files-found: error
