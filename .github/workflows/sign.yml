@@ -12,41 +12,32 @@ jobs:
 
       - name: Install gdown using pipx
         run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install pipx
+          python3 -m pip install --break-system-packages pipx
           pipx install gdown
 
       - name: Download IPA
         run: |
           gdown "https://drive.google.com/uc?id=1IllWdFD2eHowTVDelG3hpbhme9Tlzhy2" -O MLBB_unsigned.ipa
 
-      - name: Inspect and unzip IPA
+      - name: Unzip and re-sign app
         run: |
-          unzip -q MLBB_unsigned.ipa
-          echo "📦 Contents of Payload:"
-          ls -l Payload
-          echo "📂 Contents of .app:"
-          ls -l Payload/*.app
+          set -e
+          echo "Unzipping IPA..."
+          unzip -q MLBB_unsigned.ipa || { echo "Unzip failed"; exit 1; }
 
-      - name: Show binary info
-        run: |
-          file Payload/*.app/*
-          otool -hv Payload/*.app/* || true
-          codesign --display --verbose=4 Payload/*.app/* || true
+          echo "Verifying Payload contents..."
+          ls -al Payload || { echo "Payload directory missing"; exit 1; }
 
-      - name: Attempt re-sign
-        run: |
-          echo "🔏 Attempting to re-sign..."
-          codesign -s - --force --deep --options=runtime Payload/*.app || {
-            echo "❌ Code signing failed"
-            exit 1
-          }
+          echo "Signing app..."
+          codesign -s - --force --deep Payload/*.app || { echo "Code signing failed"; exit 1; }
 
-          zip -qry MLBB_signed.ipa Payload
-          echo "✅ Re-sign completed"
+          echo "Zipping signed IPA..."
+          zip -qry MLBB_signed.ipa Payload || { echo "Zipping failed"; exit 1; }
+
+          echo "✅ Done"
 
       - name: Upload signed IPA
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: MLBB_signed
           path: MLBB_signed.ipa
