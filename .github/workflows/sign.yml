@@ -17,13 +17,13 @@ jobs:
         run: |
           gdown --id 1IllWdFD2eHowTVDelG3hpbhme9Tlzhy2 -O MLBB_unsigned.ipa
 
-      - name: Re-sign IPA
+      - name: Unzip and re-sign
         run: |
           unzip -q MLBB_unsigned.ipa
           codesign -s - --force --deep Payload/*.app
           zip -qry MLBB_signed.ipa Payload
 
-      - name: Upload re-signed IPA
+      - name: Upload signed IPA
         uses: actions/upload-artifact@v3
         with:
           name: MLBB_signed
