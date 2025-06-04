@@ -1,0 +1,35 @@
+name: Sign iOS IPA
+
+on:
+  workflow_dispatch:
+
+jobs:
+  sign-ipa:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          brew install create-dmg
+          mkdir signed_output
+
+      - name: Decode Apple credentials
+        run: |
+          echo "${{ secrets.APPLE_PASSWORD }}" > apple-password.txt
+          echo "${{ secrets.APPLE_ID }}" > apple-id.txt
+
+      - name: Re-sign IPA
+        run: |
+          mkdir temp && cd temp
+          cp ../MLBB_unsigned.ipa ./original.ipa
+          unzip -q original.ipa
+          codesign -s - --force --deep Payload/*.app
+          zip -qry ../signed_output/MLBB_signed.ipa Payload
+
+      - name: Upload Signed IPA
+        uses: actions/upload-artifact@v3
+        with:
+          name: MLBB_signed
+          path: signed_output/MLBB_signed.ipa
