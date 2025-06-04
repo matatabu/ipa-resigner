@@ -11,19 +11,39 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Install gdown using pipx
-        run: pipx install gdown
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install pipx
+          pipx install gdown
 
       - name: Download IPA
         run: |
           gdown "https://drive.google.com/uc?id=1IllWdFD2eHowTVDelG3hpbhme9Tlzhy2" -O MLBB_unsigned.ipa
 
-      - name: Unzip and re-sign app
+      - name: Inspect and unzip IPA
         run: |
-          unzip -q MLBB_unsigned.ipa || { echo "Unzip failed"; exit 1; }
-          ls -al Payload || { echo "Payload directory missing"; exit 1; }
-          codesign -s - --force --deep Payload/*.app || { echo "Code signing failed"; exit 1; }
-          zip -qry MLBB_signed.ipa Payload || { echo "Zipping failed"; exit 1; }
-          echo "✅ Done"
+          unzip -q MLBB_unsigned.ipa
+          echo "📦 Contents of Payload:"
+          ls -l Payload
+          echo "📂 Contents of .app:"
+          ls -l Payload/*.app
+
+      - name: Show binary info
+        run: |
+          file Payload/*.app/*
+          otool -hv Payload/*.app/* || true
+          codesign --display --verbose=4 Payload/*.app/* || true
+
+      - name: Attempt re-sign
+        run: |
+          echo "🔏 Attempting to re-sign..."
+          codesign -s - --force --deep --options=runtime Payload/*.app || {
+            echo "❌ Code signing failed"
+            exit 1
+          }
+
+          zip -qry MLBB_signed.ipa Payload
+          echo "✅ Re-sign completed"
 
       - name: Upload signed IPA
         uses: actions/upload-artifact@v4
