@@ -8,30 +8,21 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Install gdown
-        run: pip3 install gdown --break-system-packages
+        run: pip3 install gdown
 
       - name: Download IPA
         run: |
-          gdown --id 1I1IWdFD2eHoWTvDe1G3hpbhme9Tlzhy2 -O MLBB_unsigned.ipa
+          gdown "https://drive.google.com/uc?id=1IllWdFD2eHowTVDelG3hpbhme9Tlzhy2" -O MLBB_unsigned.ipa
 
       - name: Unzip and re-sign app
         run: |
-          set -e
-          echo "Unzipping IPA..."
           unzip -q MLBB_unsigned.ipa || { echo "Unzip failed"; exit 1; }
-
-          echo "Verifying Payload contents..."
-          ls -l Payload || { echo "Payload directory missing"; exit 1; }
-
-          echo "Signing app..."
+          ls -al Payload || { echo "Payload directory missing"; exit 1; }
           codesign -s - --force --deep Payload/*.app || { echo "Code signing failed"; exit 1; }
-
-          echo "Zipping signed IPA..."
           zip -qry MLBB_signed.ipa Payload || { echo "Zipping failed"; exit 1; }
-
           echo "✅ Done"
 
       - name: Upload signed IPA
