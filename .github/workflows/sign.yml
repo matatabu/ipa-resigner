@@ -10,8 +10,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Install gdown
-        run: pip3 install gdown
+      - name: Install gdown using pipx
+        run: pipx install gdown
 
       - name: Download IPA
         run: |
