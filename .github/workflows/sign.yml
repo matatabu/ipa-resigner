@@ -10,12 +10,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install gdown using pipx
+      - name: Install gdown via Homebrew
         run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install pipx
-          pipx ensurepath
-          pipx install gdown
+          brew install gdown
 
       - name: Download IPA
         run: |
