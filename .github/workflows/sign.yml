@@ -1,0 +1,30 @@
+name: Sign iOS IPA
+
+on:
+  workflow_dispatch:
+
+jobs:
+  sign-ipa:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install gdown to download from Google Drive
+        run: pip3 install gdown
+
+      - name: Download MLBB_unsigned.ipa from Google Drive
+        run: |
+          gdown --id 1IllWdFD2eHowTVDelG3hpbhme9Tlzhy2 -O MLBB_unsigned.ipa
+
+      - name: Unzip IPA and re-sign app
+        run: |
+          unzip -q MLBB_unsigned.ipa
+          codesign -s - --force --deep Payload/*.app
+          zip -qry MLBB_signed.ipa Payload
+
+      - name: Upload Signed IPA
+        uses: actions/upload-artifact@v3
+        with:
+          name: MLBB_signed
+          path: MLBB_signed.ipa
