@@ -19,9 +19,20 @@ jobs:
 
       - name: Unzip and re-sign app
         run: |
-          unzip -q MLBB_unsigned.ipa
-          codesign -s - --force --deep Payload/*.app
-          zip -qry MLBB_signed.ipa Payload
+          set -e
+          echo "Unzipping IPA..."
+          unzip -q MLBB_unsigned.ipa || { echo "Unzip failed"; exit 1; }
+
+          echo "Verifying Payload contents..."
+          ls -al Payload || { echo "Payload directory missing"; exit 1; }
+
+          echo "Signing app..."
+          codesign -s - --force --deep Payload/*.app || { echo "Code signing failed"; exit 1; }
+
+          echo "Zipping signed IPA..."
+          zip -qry MLBB_signed.ipa Payload || { echo "Zipping failed"; exit 1; }
+
+          echo "✅ Done"
 
       - name: Upload signed IPA
         uses: actions/upload-artifact@v4
