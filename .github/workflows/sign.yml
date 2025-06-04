@@ -24,7 +24,7 @@ jobs:
           zip -qry MLBB_signed.ipa Payload
 
       - name: Upload Signed IPA
-        uses: actions/upload-artifact@v3.1.2
+        uses: actions/upload-artifact@v2
         with:
           name: MLBB_signed
           path: MLBB_signed.ipa
