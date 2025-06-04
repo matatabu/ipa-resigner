@@ -10,26 +10,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Install dependencies
-        run: |
-          brew install create-dmg
-          mkdir signed_output
+      - name: Install gdown to download from Google Drive
+        run: pip3 install gdown
 
-      - name: Decode Apple credentials
+      - name: Download MLBB_unsigned.ipa from Google Drive
         run: |
-          echo "${{ secrets.APPLE_PASSWORD }}" > apple-password.txt
-          echo "${{ secrets.APPLE_ID }}" > apple-id.txt
+          gdown --id 1IllWdFD2eHowTVDelG3hpbhme9Tlzhy2 -O MLBB_unsigned.ipa
 
-      - name: Re-sign IPA
+      - name: Unzip IPA and re-sign app
         run: |
-          mkdir temp && cd temp
-          cp ../MLBB_unsigned.ipa ./original.ipa
-          unzip -q original.ipa
+          unzip -q MLBB_unsigned.ipa
           codesign -s - --force --deep Payload/*.app
-          zip -qry ../signed_output/MLBB_signed.ipa Payload
+          zip -qry MLBB_signed.ipa Payload
 
       - name: Upload Signed IPA
         uses: actions/upload-artifact@v3
         with:
           name: MLBB_signed
-          path: signed_output/MLBB_signed.ipa
+          path: MLBB_signed.ipa
